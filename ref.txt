@@ -1,0 +1,31 @@
+#include "ws_stream.h"
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+
+int main(void) {
+    // Create WebSocket stream with debug enabled
+    ws_stream* stream = ws_stream_connect("108.49.20.247", false);
+    if (!stream) {
+        fprintf(stderr, "Failed to create WebSocket stream\n");
+        return 1;
+    }
+    
+    // Buffer for receiving data
+    char buffer[1024];
+    
+    // Main receive loop
+    while (1) {
+        if (ws_stream_data_available(stream)) {
+            ssize_t bytes_read = ws_stream_read(stream, buffer, sizeof(buffer) - 1);
+            if (bytes_read > 0) {
+                buffer[bytes_read] = '\0';
+                printf("%s", buffer);
+            }
+        }
+        usleep(10000); // Sleep for 10ms to prevent busy-waiting
+    }
+    
+    ws_stream_close(stream);
+    return 0;
+}
